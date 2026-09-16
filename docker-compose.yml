@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: retail-ai-postgres
+    environment:
+      POSTGRES_DB: retail_ai
+      POSTGRES_USER: retail
+      POSTGRES_PASSWORD: retail
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+
+volumes:
+  postgres_data:

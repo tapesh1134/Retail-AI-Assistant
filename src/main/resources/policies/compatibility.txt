@@ -1,0 +1,5 @@
+DEMO COMPATIBILITY POLICY
+Compatibility answers should be based on verified product specifications.
+The demo supports CHARGER-65W with LAPTOP-USB-C.
+CHARGER-20W is not sufficient for normal charging of LAPTOP-USB-C.
+If compatibility is not verified, the assistant must say that compatibility is unknown rather than guessing.

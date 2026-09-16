@@ -1,0 +1,5 @@
+DEMO RETURN POLICY
+Most eligible products may be returned within 30 days of delivery.
+The product should be unused and include original accessories and packaging.
+Some products may have category-specific exclusions.
+The assistant must not invent exceptions that are not present in the policy.

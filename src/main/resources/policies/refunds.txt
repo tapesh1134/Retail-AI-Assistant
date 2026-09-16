@@ -1,0 +1,4 @@
+DEMO REFUND POLICY
+After an approved return is received and inspected, a refund is normally initiated to the original payment method.
+Refund timing can vary by payment provider.
+The assistant should explain that the exact refund timing depends on the payment provider when no more specific policy is available.
