@@ -1,106 +1,386 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
   <title>Retail AI Assistant Demo</title>
+
   <style>
-    body{font-family:Arial,sans-serif;background:#f4f6f8;margin:0}
-    .app{max-width:900px;margin:40px auto;padding:20px}
-    .card{background:#fff;border:1px solid #ddd;border-radius:14px;padding:20px}
-    h1{margin-top:0}
-    #messages{height:430px;overflow:auto;border:1px solid #ddd;border-radius:10px;padding:14px;background:#fafafa}
-    .msg{padding:10px 12px;margin:8px 0;border-radius:10px;max-width:80%;white-space:pre-wrap}
-    .user{background:#e8f0fe;margin-left:auto}
-    .ai{background:#eee}
-    .row{display:flex;gap:10px;margin-top:12px}
-    input{flex:1;padding:13px;border:1px solid #bbb;border-radius:8px;font-size:16px}
-    button{padding:12px 18px;border:0;border-radius:8px;cursor:pointer}
-    .examples{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
-    .examples button{background:#eee}
-    .meta{font-size:12px;color:#666;margin-top:10px}
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      margin: 0;
+    }
+
+    .app {
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 20px;
+    }
+
+    .card {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 14px;
+      padding: 20px;
+    }
+
+    h1 {
+      margin-top: 0;
+    }
+
+    #messages {
+      height: 430px;
+      overflow-y: auto;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 14px;
+      background: #fafafa;
+    }
+
+    .msg {
+      padding: 10px 12px;
+      margin: 8px 0;
+      border-radius: 10px;
+      max-width: 80%;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
+    .user {
+      background: #e8f0fe;
+      margin-left: auto;
+    }
+
+    .ai {
+      background: #eee;
+    }
+
+    .loading {
+      color: #777;
+      font-style: italic;
+    }
+
+    .error {
+      background: #ffe8e8;
+      color: #b00020;
+    }
+
+    .row {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    input {
+      flex: 1;
+      padding: 13px;
+      border: 1px solid #bbb;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+
+    button {
+      padding: 12px 18px;
+      border: 0;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
+    .examples {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin: 12px 0;
+    }
+
+    .examples button {
+      background: #eee;
+    }
+
+    .meta {
+      font-size: 12px;
+      color: #666;
+      margin-top: 10px;
+      min-height: 16px;
+    }
   </style>
 </head>
+
 <body>
+
 <div class="app">
+
   <div class="card">
+
     <h1>Retail AI Assistant</h1>
-    <p>Demo: order status, returns/refunds, and product compatibility.</p>
+
+    <p>
+      Demo: order status, returns/refunds,
+      and product compatibility.
+    </p>
 
     <div class="examples">
-      <button onclick="ask('Where is order 10001?')">Order 10001</button>
-      <button onclick="ask('Can I return a product after 20 days?')">Return policy</button>
-      <button onclick="ask('Is CHARGER-65W compatible with LAPTOP-USB-C?')">Compatibility</button>
+
+      <button
+              type="button"
+              onclick="ask('Where is order 10001?')">
+        Order 10001
+      </button>
+
+      <button
+              type="button"
+              onclick="ask('Can I return a product after 20 days?')">
+        Return policy
+      </button>
+
+      <button
+              type="button"
+              onclick="ask('Is CHARGER-65W compatible with LAPTOP-USB-C?')">
+        Compatibility
+      </button>
+
     </div>
 
     <div id="messages"></div>
 
-    <form class="row" id="form">
-      <input id="input" placeholder="Ask a support question..." autocomplete="off">
-      <button type="submit">Send</button>
+    <form
+            class="row"
+            id="form">
+
+      <input
+              id="input"
+              placeholder="Ask a support question..."
+              autocomplete="off"
+              required>
+
+      <button
+              id="sendButton"
+              type="submit">
+        Send
+      </button>
+
     </form>
-    <div class="meta" id="meta"></div>
+
+    <div
+            class="meta"
+            id="meta">
+    </div>
+
   </div>
+
 </div>
 
 <script>
-const messages = document.getElementById('messages');
-const input = document.getElementById('input');
-const meta = document.getElementById('meta');
 
-function add(text, cls) {
-  const div = document.createElement('div');
-  div.className = 'msg ' + cls;
-  div.textContent = text;
-  messages.appendChild(div);
-  messages.scrollTop = messages.scrollHeight;
-  return div;
-}
+  const messages =
+          document.getElementById('messages');
 
-async function ask(message) {
-  if (!message) return;
-  add(message, 'user');
-  input.value = '';
-  const ai = add('', 'ai');
-  const start = performance.now();
+  const input =
+          document.getElementById('input');
 
-  const response = await fetch('/api/chat/stream', {
-    method: 'POST',
-    headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({message})
-  });
+  const meta =
+          document.getElementById('meta');
 
-  if (!response.ok || !response.body) {
-    ai.textContent = 'Request failed. Check the backend and OPENAI_API_KEY.';
-    return;
+  const sendButton =
+          document.getElementById('sendButton');
+
+
+  function addMessage(text, type) {
+
+    const div =
+            document.createElement('div');
+
+    div.className =
+            'msg ' + type;
+
+    div.textContent =
+            text;
+
+    messages.appendChild(div);
+
+    scrollToBottom();
+
+    return div;
   }
 
-  const reader = response.body.getReader();
-  const decoder = new TextDecoder();
-  let buffer = '';
 
-  while (true) {
-    const {value, done} = await reader.read();
-    if (done) break;
-    buffer += decoder.decode(value, {stream:true});
-    const parts = buffer.split('\\n\\n');
-    buffer = parts.pop();
+  function scrollToBottom() {
 
-    for (const part of parts) {
-      if (part.startsWith('data: ')) {
-        ai.textContent += part.substring(6).replace(/\\\\n/g, '\\n');
-        messages.scrollTop = messages.scrollHeight;
+    messages.scrollTop =
+            messages.scrollHeight;
+  }
+
+
+  function setLoading(loading) {
+
+    sendButton.disabled =
+            loading;
+
+    input.disabled =
+            loading;
+
+    sendButton.textContent =
+            loading
+                    ? 'Sending...'
+                    : 'Send';
+  }
+
+
+  async function ask(message) {
+
+    message =
+            message?.trim();
+
+    if (!message) {
+      return;
+    }
+
+    addMessage(
+            message,
+            'user'
+    );
+
+    input.value = '';
+
+    const aiMessage =
+            addMessage(
+                    'Thinking...',
+                    'ai loading'
+            );
+
+    meta.textContent = '';
+
+    setLoading(true);
+
+    const start =
+            performance.now();
+
+    try {
+
+      const response =
+              await fetch(
+                      '/api/chat',
+                      {
+                        method: 'POST',
+
+                        headers: {
+                          'Content-Type':
+                                  'application/json'
+                        },
+
+                        body: JSON.stringify({
+                          message: message
+                        })
+                      }
+              );
+
+
+      if (!response.ok) {
+
+        let errorMessage =
+                'Request failed';
+
+        try {
+
+          const errorBody =
+                  await response.text();
+
+          if (errorBody) {
+            errorMessage +=
+                    ': ' + errorBody;
+          }
+
+        } catch (ignored) {
+        }
+
+        throw new Error(
+                errorMessage
+        );
       }
+
+
+      const data =
+              await response.json();
+
+
+      aiMessage.className =
+              'msg ai';
+
+
+      if (data.answer) {
+
+        aiMessage.textContent =
+                data.answer;
+
+      } else {
+
+        aiMessage.textContent =
+                'The assistant returned an empty response.';
+      }
+
+
+      const duration =
+              Math.round(
+                      performance.now()
+                      - start
+              );
+
+      meta.textContent =
+              'Response completed in '
+              + duration
+              + ' ms';
+
+    } catch (error) {
+
+      console.error(
+              'Chat request failed:',
+              error
+      );
+
+      aiMessage.className =
+              'msg error';
+
+      aiMessage.textContent =
+              'Request failed. '
+              + 'Check the backend logs and API configuration.';
+
+      meta.textContent =
+              error.message;
+
+    } finally {
+
+      setLoading(false);
+
+      input.focus();
+
+      scrollToBottom();
     }
   }
 
-  meta.textContent = 'Stream completed in ' + Math.round(performance.now() - start) + ' ms';
-}
 
-document.getElementById('form').addEventListener('submit', e => {
-  e.preventDefault();
-  ask(input.value.trim());
-});
+  document
+          .getElementById('form')
+          .addEventListener(
+                  'submit',
+                  function (event) {
+
+                    event.preventDefault();
+
+                    ask(
+                            input.value
+                    );
+                  }
+          );
+
 </script>
+
 </body>
 </html>

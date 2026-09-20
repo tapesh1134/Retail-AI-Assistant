@@ -11,23 +11,44 @@ import reactor.core.publisher.Flux;
 @RequestMapping("/api/chat")
 @CrossOrigin
 public class ChatController {
+
     private final RetailAssistantService assistant;
 
-    public ChatController(RetailAssistantService assistant) {
+    public ChatController(
+            RetailAssistantService assistant
+    ) {
         this.assistant = assistant;
     }
 
-    public record ChatRequest(@NotBlank String message) {}
-    public record ChatResponse(String answer) {}
+    public record ChatRequest(
+            @NotBlank String message
+    ) {}
+
+    public record ChatResponse(
+            String answer
+    ) {}
 
     @PostMapping
-    public ChatResponse chat(@Valid @RequestBody ChatRequest request) {
-        return new ChatResponse(assistant.answer(request.message()));
+    public ChatResponse chat(
+            @Valid @RequestBody ChatRequest request
+    ) {
+
+        String answer =
+                assistant.chat(request.message());
+
+        return new ChatResponse(answer);
     }
 
-    @PostMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<String> stream(@Valid @RequestBody ChatRequest request) {
-        return assistant.stream(request.message())
-                .map(token -> "data: " + token.replace("\n", "\\n") + "\n\n");
+    @PostMapping(
+            value = "/stream",
+            produces = MediaType.TEXT_EVENT_STREAM_VALUE
+    )
+    public Flux<String> stream(
+            @Valid @RequestBody ChatRequest request
+    ) {
+
+        return assistant.stream(
+                request.message()
+        );
     }
 }
